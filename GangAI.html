@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GangAI Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-image: url("ocean_surface.jpg");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-wrapper {
+      width: 100%;
+      max-width: 1200px;
+      height: 90vh;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .info-card {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      padding: 32px;
+      text-align: center;
+      backdrop-filter: blur(4px);
+    }
+
+    /* BIG centered avatar + intro + idle animation */
+    .info-avatar {
+      width: 230px;
+      height: 230px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 0 auto 24px auto;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+      border: 6px solid #ffffff;
+      /* first "swim in", then gentle floating forever */
+      animation:
+        intro-swim 1.3s ease-out forwards,
+        float 4s 1.3s ease-in-out infinite;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .info-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Hover = small curious lean */
+    .info-avatar:hover {
+      transform: translateY(-4px) scale(1.03) rotate(-2deg);
+    }
+
+    .info-title {
+      font-size: 34px;
+      font-weight: 800;
+      margin: 0 0 12px 0;
+      color: #0d47a1;
+    }
+
+    /* Chat panel */
+    .chat-card {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(4px);
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: #1565c0;
+      color: white;
+    }
+
+    .header-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+    }
+
+    .header-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .chat-header-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .chat-subtitle {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .chat-body {
+      flex: 1;
+    }
+
+    .chat-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    @media (max-width: 900px) {
+      .page-wrapper {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+    }
+
+    /* ---------- Avatar animations ---------- */
+
+    /* 1) Intro: shark swims in & pops into place */
+    @keyframes intro-swim {
+      0% {
+        transform: translateY(-80px) translateX(-60px) scale(0.6) rotate(-12deg);
+        opacity: 0;
+      }
+      50% {
+        transform: translateY(12px) translateX(10px) scale(1.08) rotate(6deg);
+        opacity: 1;
+      }
+      80% {
+        transform: translateY(-6px) translateX(-4px) scale(0.98) rotate(-3deg);
+      }
+      100% {
+        transform: translateY(0) translateX(0) scale(1) rotate(0deg);
+      }
+    }
+
+    /* 2) Idle floating = subtle breathing / bobbing */
+    @keyframes float {
+      0%   { transform: translateY(0px); }
+      50%  { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* 3) "Expressive" reaction when chatting (excited wiggle + glow) */
+    .info-avatar.express {
+      animation:
+        express 0.8s ease-in-out 1,
+        float 4s 0.8s ease-in-out infinite;
+      box-shadow: 0 18px 40px rgba(0, 188, 212, 0.6);
+    }
+
+    @keyframes express {
+      0%   { transform: translateY(0) scale(1) rotate(0deg); }
+      15%  { transform: translateY(-6px) scale(1.06) rotate(-6deg); }
+      30%  { transform: translateY(-2px) scale(1.06) rotate(6deg); }
+      45%  { transform: translateY(-6px) scale(1.08) rotate(-5deg); }
+      60%  { transform: translateY(-2px) scale(1.08) rotate(5deg); }
+      80%  { transform: translateY(-4px) scale(1.03) rotate(-2deg); }
+      100% { transform: translateY(0) scale(1) rotate(0deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrapper">
+    
+    <!-- LEFT PANEL -->
+    <section class="info-card">
+      <!-- Enlarged avatar, centered at top -->
+      <div class="info-avatar">
+          <img id="gangai-shark" src="Ganges_Shark_Avatar.png" alt="GangAI shark avatar">
+      </div>
+
+      <h1 class="info-title">GangAI – Ganges Shark Chatbot</h1>
+
+      <!-- Friendly italic description -->
+      <p style="
+        font-size: 18px;
+        font-style: italic;
+        font-weight: 300;
+        color: #1b2a33;
+        line-height: 1.6;
+        margin: 0 auto;
+        max-width: 90%;
+      ">
+        Meet GangAI — your cheerful guide to the world of the Ganges shark!
+        Whether you're curious about its habitat, diet, behavior, or why it's endangered,
+        GangAI is here to explain everything in a simple and fun way. Powered by Dialogflow ES
+        and wrapped in an ocean-themed design, this chatbot makes learning feel light and interactive.
+        Dive in and explore the fascinating life of the Ganges shark with GangAI swimming beside you
+        every fin of the way!
+      </p>
+    </section>
+
+    <!-- RIGHT PANEL (chatbot) -->
+    <section class="chat-card">
+      <div class="chat-header">
+        <div class="header-avatar">
+          <img src="Ganges_Shark_Avatar.png" alt="GangAI avatar">
+        </div>
+
+        <div class="chat-header-text">
+          <div class="chat-title">GangAI Chatbot</div>
+          <div class="chat-subtitle">Your Ganges shark assistant</div>
+        </div>
+      </div>
+
+      <div class="chat-body" id="chat-area">
+        <iframe
+          id="gangai-frame"
+          class="chat-iframe"
+         src="https://console.dialogflow.com/api-client/demo/embedded/71c8a275-b6f6-43bb-b528-b78be66f0337"
+          allow="microphone">
+        </iframe>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- JS: make the shark react when you interact with the chat -->
+  <script>
+    const avatar = document.getElementById('gangai-avatar');
+    const chatArea = document.getElementById('chat-area');
+    const chatFrame = document.getElementById('gangai-frame');
+
+    function triggerExpression() {
+      if (!avatar) return;
+      avatar.classList.remove('express');  // restart if already running
+      void avatar.offsetWidth;            // force reflow
+      avatar.classList.add('express');
+      setTimeout(() => avatar.classList.remove('express'), 800);
+    }
+
+    // Extra little reaction right after the intro swim finishes
+    window.addEventListener('load', () => {
+      setTimeout(triggerExpression, 1500);
+    });
+
+    // React whenever the user clicks the chat panel or inside the iframe
+    chatArea.addEventListener('click', triggerExpression);
+    chatFrame.addEventListener('click', triggerExpression);
+  </script>
+</body>
+</html>
