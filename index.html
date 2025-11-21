@@ -39,7 +39,6 @@
       backdrop-filter: blur(4px);
     }
 
-    /* BIG centered avatar + intro + idle animation */
     .info-avatar {
       width: 230px;
       height: 230px;
@@ -48,7 +47,6 @@
       margin: 0 auto 24px auto;
       box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
       border: 6px solid #ffffff;
-      /* first "swim in", then gentle floating forever */
       animation:
         intro-swim 1.3s ease-out forwards,
         float 4s 1.3s ease-in-out infinite;
@@ -61,7 +59,6 @@
       object-fit: cover;
     }
 
-    /* Hover = small curious lean */
     .info-avatar:hover {
       transform: translateY(-4px) scale(1.03) rotate(-2deg);
     }
@@ -73,7 +70,6 @@
       color: #0d47a1;
     }
 
-    /* Chat panel */
     .chat-card {
       background: rgba(255, 255, 255, 0.92);
       border-radius: 24px;
@@ -123,14 +119,10 @@
       opacity: 0.9;
     }
 
-    .chat-body {
+    /* Right card just acts as a white background behind the floating messenger */
+    .chat-body-placeholder {
       flex: 1;
-    }
-
-    .chat-iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+      background: rgba(255, 255, 255, 0.9);
     }
 
     @media (max-width: 900px) {
@@ -140,9 +132,7 @@
       }
     }
 
-    /* ---------- Avatar animations ---------- */
-
-    /* 1) Intro: shark swims in & pops into place */
+    /* Avatar animations */
     @keyframes intro-swim {
       0% {
         transform: translateY(-80px) translateX(-60px) scale(0.6) rotate(-12deg);
@@ -160,14 +150,12 @@
       }
     }
 
-    /* 2) Idle floating = subtle breathing / bobbing */
     @keyframes float {
       0%   { transform: translateY(0px); }
       50%  { transform: translateY(-8px); }
       100% { transform: translateY(0px); }
     }
 
-    /* 3) "Expressive" reaction when chatting (excited wiggle + glow) */
     .info-avatar.express {
       animation:
         express 0.8s ease-in-out 1,
@@ -184,22 +172,32 @@
       80%  { transform: translateY(-4px) scale(1.03) rotate(-2deg); }
       100% { transform: translateY(0) scale(1) rotate(0deg); }
     }
+
+    /* Optional: move Dialogflow Messenger so it sits over the right card */
+    df-messenger {
+      --df-messenger-bot-message: #e0f7fa;
+      --df-messenger-user-message: #c5e1a5;
+      --df-messenger-chip-border-radius: 20px;
+      --df-messenger-font-color: #000;
+      --df-messenger-send-icon: #1565c0;
+      position: fixed;
+      right: 80px;
+      bottom: 40px;
+      z-index: 999;
+    }
   </style>
 </head>
 
 <body>
   <div class="page-wrapper">
-    
     <!-- LEFT PANEL -->
     <section class="info-card">
-      <!-- Enlarged avatar, centered at top -->
-      <div class="info-avatar">
-          <img id="gangai-shark" src="Ganges_Shark_Avatar.png" alt="GangAI shark avatar">
+      <div class="info-avatar" id="gangai-avatar">
+        <img src="Ganges_Shark_Avatar.png" alt="GangAI shark avatar">
       </div>
 
       <h1 class="info-title">GangAI – Ganges Shark Chatbot</h1>
 
-      <!-- Friendly italic description -->
       <p style="
         font-size: 18px;
         font-style: italic;
@@ -218,53 +216,49 @@
       </p>
     </section>
 
-    <!-- RIGHT PANEL (chatbot) -->
+    <!-- RIGHT PANEL (background card behind the floating messenger) -->
     <section class="chat-card">
       <div class="chat-header">
         <div class="header-avatar">
           <img src="Ganges_Shark_Avatar.png" alt="GangAI avatar">
         </div>
-
         <div class="chat-header-text">
           <div class="chat-title">GangAI Chatbot</div>
           <div class="chat-subtitle">Your Ganges shark assistant</div>
         </div>
       </div>
-
-      <div class="chat-body" id="chat-area">
-        <iframe
-          id="gangai-frame"
-          class="chat-iframe"
-         src="https://console.dialogflow.com/api-client/demo/embedded/71c8a275-b6f6-43bb-b528-b78be66f0337"
-          allow="microphone">
-        </iframe>
-      </div>
+      <div class="chat-body-placeholder" id="chat-area"></div>
     </section>
-
   </div>
 
-  <!-- JS: make the shark react when you interact with the chat -->
+  <!-- Dialogflow Messenger script + widget -->
+  <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+
+  <df-messenger
+    intent="WELCOME"
+    chat-title="GangAI Chatbot"
+    agent-id="71c8a275-b6f6-43bb-b528-b78be66f0337"
+    language-code="en">
+  </df-messenger>
+
+  <!-- Simple "expression" animation when the user clicks the chat area -->
   <script>
     const avatar = document.getElementById('gangai-avatar');
     const chatArea = document.getElementById('chat-area');
-    const chatFrame = document.getElementById('gangai-frame');
 
     function triggerExpression() {
       if (!avatar) return;
-      avatar.classList.remove('express');  // restart if already running
-      void avatar.offsetWidth;            // force reflow
+      avatar.classList.remove('express');
+      void avatar.offsetWidth;
       avatar.classList.add('express');
       setTimeout(() => avatar.classList.remove('express'), 800);
     }
 
-    // Extra little reaction right after the intro swim finishes
     window.addEventListener('load', () => {
       setTimeout(triggerExpression, 1500);
     });
 
-    // React whenever the user clicks the chat panel or inside the iframe
     chatArea.addEventListener('click', triggerExpression);
-    chatFrame.addEventListener('click', triggerExpression);
   </script>
 </body>
 </html>
